@@ -579,7 +579,8 @@ if	pdoclass("MUICustody", "lua/mui_custody.lua") and
 	end
 end
 --------------------- MUI_STATS ----------------------
-if pdoclass("MUIStats", "lua/mui_stats.lua") then
+if 	pdoclass("MUIStats", "lua/mui_stats.lua") and
+	pdoclass("AnimatedList", "lua/animated_list.lua") then
 	void({ "show_casing","hide_casing","complete_sub_objective","remind_objective","complete_objective",
 			"_setup_stats_screen","_create_objectives","_create_assault_corner","_create_heist_timer" });
 

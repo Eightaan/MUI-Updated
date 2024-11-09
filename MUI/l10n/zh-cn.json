@@ -245,5 +245,27 @@
 	"mui_font_s" : "小",
 	"mui_font_m" : "中",
 	"mui_font_ms" : "中等阴影",
-	"mui_font_l" : "大"
+	"mui_font_l" : "大",
+	
+	"mui_disable_leech_support_title" : "Disable Leech Ampule Indicator",
+	"mui_disable_leech_support_desc" : "Disables Leech Ampule Support Entirely",
+	
+	"section_1_title" : " ",
+	"section_2_title" : " ",
+	"section_3_title" : " ",
+	"divider_2_title" : " ",
+	"divider_3_title" : " ",
+	"divider_4_title" : " ",
+	"divider_5_title" : " ",
+	"divider_6_title" : " ",
+	"divider_7_title" : " ",
+	"divider_8_title" : " ",
+	"divider_9_title" : " ",
+	"divider_10_title" : " ",
+	"divider_11_title" : " ",
+	"divider_12_title" : " ",
+	"divider_13_title" : " ",
+	"divider_14_title" : " ",
+	"divider_15_title" : " ",
+	"divider_16_title" : " "
 }

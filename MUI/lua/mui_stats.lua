@@ -147,7 +147,7 @@ function MUIStats:init()
 		name = "title",
 		font = muiFont,
 		color = Color.white,
-		text = managers.localization:to_upper_text("dialog_wait"),
+		text = "",
 	});
 	objectives_panel:text({
 		name = "amount",
@@ -529,6 +529,8 @@ function MUIStats:loot_value_updated()
 	local acquired = bag:child("amount");
 	local cash = loot:child("text");
 	local gage = loot:child("gage_amount");
+	local gage_icon = loot:child("gage_icon");
+	local gage_text = loot:child("gage_text");
 
 	local job = managers.job;
 	local global = managers.loot._global;
@@ -561,14 +563,19 @@ function MUIStats:loot_value_updated()
 	end
 	total_value = math.floor(total_value * 0.001);
 	
-	local text = tostring(bonus);
-	if mandatory >= 1 then
-		text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
-	end
+	-- local text = tostring(bonus);
+	-- if mandatory >= 1 then
+		-- text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
+	-- end
 
-	acquired:set_text(text);
+	acquired:set_text(tostring(required + bonus));
 	cash:set_text(managers.experience:cash_string(total_value).."K");
 	gage:set_text(format("%d/%d", packages - remaining, packages));
+
+	gage:set_visible(remaining < packages);
+	gage_icon:set_visible(remaining < packages);
+	gage_text:set_visible(remaining < packages);
+
 	self:resize_loot();
 end
 
