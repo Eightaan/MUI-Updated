@@ -572,7 +572,7 @@ function MUIStats:loot_value_updated()
 	local loot_count = managers.interaction:get_current_total_loot_count();
 
 	if EIVHUD and EIVHUD.Options:GetValue("HUD/Tab") and loot_count > 0 then
-		local border_crossing_fix = Global.game_settings.level_id == "mex" and loot_count > 41 and 4;
+		local border_crossing_fix = Global.game_settings.level_id == "mex" and loot_count > 41 and "/4";
 		loot_amount = border_crossing_fix or "/" .. loot_count;
 	end
 
