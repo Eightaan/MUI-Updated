@@ -4,6 +4,7 @@
 -- License GPLv3 <https://www.gnu.org/licenses/>
 --
 -- Inquiries should be submitted by email to <mui@amaranth.red>.
+--Down counter? not self ai?
 --------
 _G.MUITeammate = _G.MUITeammate or class(HUDTeammate);
 ArmStatic.void(MUITeammate, {

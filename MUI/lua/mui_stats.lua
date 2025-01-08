@@ -568,7 +568,13 @@ function MUIStats:loot_value_updated()
 		-- text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
 	-- end
 
-	acquired:set_text(tostring(required + bonus));
+	local loot_amount = "";
+	local border_crossing_fix = Global.game_settings.level_id == "mex" and "/" .. managers.interaction:get_current_total_loot_count() > 41 and 4;
+	if EIVHUD and EIVHUD.Options:GetValue("HUD/Tab") then
+		loot_amount = border_crossing_fix or "/" .. managers.interaction:get_current_total_loot_count() or ""; -- border_crossing_fix or managers.interaction:get_current_total_loot_count()
+	end
+
+	acquired:set_text(tostring(required + bonus .. loot_amount));
 	cash:set_text(managers.experience:cash_string(total_value).."K");
 	gage:set_text(format("%d/%d", packages - remaining, packages));
 
