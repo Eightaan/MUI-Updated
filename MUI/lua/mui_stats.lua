@@ -567,7 +567,7 @@ function MUIStats:loot_value_updated()
 	-- if mandatory >= 1 then
 		-- text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
 	-- end
-	
+
 	local loot_amount = "";
 	local loot_count = managers.interaction:get_current_total_loot_count();
 
