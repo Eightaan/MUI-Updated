@@ -14,7 +14,6 @@ ArmStatic.void(MUITeammate, {
 	"_animate_update_absorb", "animate_update_absorb_active", "_animate_timer", "_animate_timer_flash"
 });
 
-
 --- /// Bunch of helper functions to alter MUI health display - Freyah /// 
 
 local function MUISetNewHealthValue(self)
