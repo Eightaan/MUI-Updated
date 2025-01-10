@@ -15,6 +15,86 @@ ArmStatic.void(MUITeammate, {
 });
 
 
+--- /// Bunch of helper functions to alter MUI health display - Freyah /// 
+local function MUISetNewHealthValue(self)
+	if self._health_numbers then
+		local data = self._health_data;
+		local Value = math.clamp(data.current / data.total, 0, 1);
+		local real_value = math.round((data.total * 10) * Value);
+		self._health_numbers:set_text(real_value);
+		if real_value > 35 then
+			self._health_numbers:set_color(Color.white, Color.black:with_alpha(0.5))
+		elseif real_value < 35 then
+			self._health_numbers:set_color(Color.red:with_alpha(0.8))
+		end
+	end
+end
+
+local function MUISetNewArmorValue(self)
+	if self._armor_numbers then
+		local data = self._armor_data;
+		local Value = math.clamp(data.current / data.total, 0, 1);
+		local real_value = math.round((data.total * 10) * Value);
+		self._armor_numbers:set_text(real_value);
+		self._armor_numbers:set_color(Color(171/255, 255/255, 255/255), Color.black:with_alpha(0.5))
+		if real_value <= 0 then
+			self._armor_numbers:hide()
+			if self._health_numbers then
+				self._health_numbers:set_y(0)
+			end
+		else
+			if self._health_numbers then
+				self._health_numbers:set_y(3)
+			end
+			self._armor_numbers:show()
+		end
+	end
+end
+
+local function MUIResized(self,size)
+	if not self._radial_health_panel then return; end
+	if not MUIMenu._data.mui_enable_health_numbers then return; end
+	
+	DelayedCalls:Add("DelayedUpdateFontSize", 0.5, function()
+		self._health_numbers:set_font_size(size/3);
+		self._armor_numbers:set_font_size(size/3);
+	end)
+	
+	if not self._health_numbers then
+		local health_numbers = self._radial_health_panel:text({
+		name = "health_numbers",
+		text = "nil",
+		font = self._font,
+		font_size = 18,
+		color = Color.white,
+		align = "center",
+		vertical = "center",
+		layer = 3,
+		y = 3,
+		visible = true
+		});
+		self._health_numbers = health_numbers
+	end
+	
+	if not self._armor_numbers then
+		local armor_numbers = self._radial_health_panel:text({
+		name = "armor_numbers",
+		text = "nil",
+		font = self._font,
+		font_size = 18,
+		color = Color.white,
+		align = "center",
+		vertical = "top",
+		layer = 3,
+		y = 17,
+		visible = true
+		});
+		self._armor_numbers = armor_numbers
+	end
+end
+
+--- /// Bunch of helper functions to alter MUI health display - Freyah /// 
+
 MUITeammate._mui_base = {};
 MUITeammate._mui_path = ModPath;
 local tunnel = ArmStatic.tunnel;
@@ -703,30 +783,31 @@ function MUITeammate:resize()
 	local total = s33 * row;
 	self._mui_size = size;
 
+	MUIResized(self, size);
+
 	local panel = self._panel;
-		local name = self._name;
-		local condition = self._condition_icon;
-		local timer = self._condition_timer;
-		local info = self._info_list;
-			local stamina = self._stamina_icon;
-		local special = self._special_list;
+	local name = self._name;
+	local condition = self._condition_icon;
+	local timer = self._condition_timer;
+	local info = self._info_list;
+	local stamina = self._stamina_icon;
+	local special = self._special_list;
 
 	local player = self._player_panel;
-		local health = self._radial_health_panel;
-			local ability = self._ability_icon;
-		local weapons = self._weapons_panel;
-			local primary = self._primary_weapon_panel;
-			local secondary = self._secondary_weapon_panel;
-		local equipment = self._equipment_list;
-		local carry = self._carry_panel;
-		local interact = self._interact_panel;
+	local health = self._radial_health_panel;
+	local ability = self._ability_icon;
+	local weapons = self._weapons_panel;
+	local primary = self._primary_weapon_panel;
+	local secondary = self._secondary_weapon_panel;
+	local equipment = self._equipment_list;
+	local carry = self._carry_panel;
+	local interact = self._interact_panel;
 
 	shape_main = main;
 	Figure(carry):shape(s33):spank();
 	Figure({health,interact}):shape(size):attach(carry, 3):recur():spank();
 	Figure(ability):shape(s33):align(2);
 	Figure(weapons):shape(sAmmo, size):attach(health, 2);
-
 	Figure(primary):shape(sAmmo, size/2):progeny(shape_ammo);
 	Figure(secondary):shape(sAmmo, size/2):attach(primary, 3):progeny(shape_ammo);
 
@@ -735,7 +816,7 @@ function MUITeammate:resize()
 
 	Figure(player):adapt():move(dock == 4 and total or 0, dock == 1 and total or 0);
 	Figure(special):shape(vert and total or player:w(), vert and player:h() or total):
-		attach(player, dock):recur():spank(s33, s33, s33/2);
+	attach(player, dock):recur():spank(s33, s33, s33/2);
 	special:set_direction(vert and 2 or 1);
 	special:set_align(jtfy);
 	special:set_flip(flip);
@@ -1296,6 +1377,7 @@ end
 
 function MUITeammate:set_health(data)
 	self._health_data = data;
+	MUISetNewHealthValue(self);
 	local dt, dc, dr = data.total, data.current, data.revives;
 	local hp, rip = self._radial_health, self._radial_rip;
 	local radial_rip_bg = self.radial_rip_bg
@@ -1380,6 +1462,7 @@ end
 
 function MUITeammate:set_armor(data)
 	self._armor_data = data;
+	MUISetNewArmorValue(self);
 	self:set_radial(self._radial_shield, data.current, data.total, self._muiSHASPD);
 	self:update_delayed_damage();
 	self:update_absorb();

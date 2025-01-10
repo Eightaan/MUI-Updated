@@ -249,23 +249,6 @@
 
 	"mui_disable_leech_support_title" : "Disable Leech Ampule Indicator",
 	"mui_disable_leech_support_desc" : "Disables Leech Ampule Support Entirely",
-	
-	"section_1_title" : " ",
-	"section_2_title" : " ",
-	"section_3_title" : " ",
-	"divider_2_title" : " ",
-	"divider_3_title" : " ",
-	"divider_4_title" : " ",
-	"divider_5_title" : " ",
-	"divider_6_title" : " ",
-	"divider_7_title" : " ",
-	"divider_8_title" : " ",
-	"divider_9_title" : " ",
-	"divider_10_title" : " ",
-	"divider_11_title" : " ",
-	"divider_12_title" : " ",
-	"divider_13_title" : " ",
-	"divider_14_title" : " ",
-	"divider_15_title" : " ",
-	"divider_16_title" : " "
+	"mui_enable_health_numbers_title" : "Show Health and Armor Numbers",
+	"mui_enable_health_numbers_desc" : "Freyah /// Show health and Armor numbers in the center of health circle"
 }

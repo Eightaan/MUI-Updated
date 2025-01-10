@@ -40,8 +40,18 @@
 			"default_value" : false
 		},
 		{
+			"type" : "divider",
+			"size" : "20"
+		},
+		{
 			"type" : "toggle",
 			"id" : "mui_disable_leech_support",
+			"callback" : "mui_toggle_callback",
+			"default_value" : false
+		},
+		{
+			"type" : "toggle",
+			"id" : "mui_enable_health_numbers",
 			"callback" : "mui_toggle_callback",
 			"default_value" : false
 		},

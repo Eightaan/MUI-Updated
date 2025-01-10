@@ -161,29 +161,41 @@ function MUIMenu:LoadFromJsonFiles( file_paths, data_table, default_table )
 					value = self._data[item_id];
 				end
 				self._default_values[item_value] = item.default_value;
-				local item_data = {
-					menu_id = menu_id,
-					id = item_id,
-					keybind_id = keybind_id,
-					connection_name = keybind_id,
-					title = item.title or item_id .. "_title",
-					desc = item.description or item_id .. "_desc",
-					callback = item.callback,
-					priority = item.priority or (#items - k),
-					value = value,
-					localized = item.localized,
-					next_node = item.next_menu,
-					min = item.min or 0,
-					max = item.max or 1,
-					step = item.step or 0.1,
-					show_value = true,
-					size = item.size,
-					binding = "",
-					button = "",
-					disabled = item.disabled,
-					items = item.items
-				};
-				jump_table[type](item_data);
+				if type ~= "divider" then
+					local item_data = {
+						menu_id = menu_id,
+						id = item_id,
+						keybind_id = keybind_id,
+						connection_name = keybind_id,
+						title = item.title or item_id .. "_title",
+						desc = item.description or item_id .. "_desc",
+						callback = item.callback,
+						priority = item.priority or (#items - k),
+						value = value,
+						localized = item.localized,
+						next_node = item.next_menu,
+						min = item.min or 0,
+						max = item.max or 1,
+						step = item.step or 0.1,
+						show_value = true,
+						size = item.size,
+						binding = "",
+						button = "",
+						disabled = item.disabled,
+						items = item.items
+					};
+					jump_table[type](item_data);
+				end
+
+				if type == "divider" then
+					MenuHelper:AddDivider({
+						menu_id = menu_id,
+						id = item_id,
+						size = item.size,
+						priority = item.priority or (#items - k),
+						connection_name = keybind_id
+					});
+				end
 			end
 		end)
 	end
