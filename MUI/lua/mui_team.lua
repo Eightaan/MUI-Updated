@@ -17,13 +17,14 @@ ArmStatic.void(MUITeammate, {
 --- /// Bunch of helper functions to alter MUI health display - Freyah /// 
 
 local function MUISetNewHealthValue(self)
+	if not MUIMenu._data.mui_enable_health_numbers then return; end
 	if self._health_numbers then
 		local data = self._health_data;
 		local Value = math.clamp(data.current / data.total, 0, 1);
 		local real_value = math.round((data.total * 10) * Value);
 		self._health_numbers:set_text(real_value);
 		if real_value > 35 then
-			self._health_numbers:set_color(Color.white, Color.black:with_alpha(0.5))
+			self._health_numbers:set_color(Color(71/255, 255/255, 120/255), Color.black:with_alpha(0.5))
 		elseif real_value < 35 then
 			self._health_numbers:set_color(Color.red:with_alpha(0.8))
 		end
@@ -31,21 +32,16 @@ local function MUISetNewHealthValue(self)
 end
 
 local function MUISetNewArmorValue(self)
+	if not MUIMenu._data.mui_enable_health_numbers then return; end
 	if self._armor_numbers then
 		local data = self._armor_data;
 		local Value = math.clamp(data.current / data.total, 0, 1);
 		local real_value = math.round((data.total * 10) * Value);
 		self._armor_numbers:set_text(real_value);
-		self._armor_numbers:set_color(Color(171/255, 255/255, 255/255), Color.black:with_alpha(0.5))
+		self._armor_numbers:set_color(Color(48/255, 141/255, 255/255), Color.black:with_alpha(0.5))
 		if real_value <= 0 then
 			self._armor_numbers:hide()
-			if self._health_numbers then
-				self._health_numbers:set_y(0)
-			end
 		else
-			if self._health_numbers then
-				self._health_numbers:set_y(3)
-			end
 			self._armor_numbers:show()
 		end
 	end
@@ -53,11 +49,20 @@ end
 
 local function MUIResized(self,size)
 	if not self._radial_health_panel then return; end
-	if not MUIMenu._data.mui_enable_health_numbers then return; end
+	if not MUIMenu._data.mui_enable_health_numbers then
+		self._radial_health_panel:child("radial_health"):show()
+		self._radial_health_panel:child("radial_shield"):show()
+		if self._health_numbers then self._health_numbers:hide() end
+		if self._armor_numbers then self._armor_numbers:hide() end
+		return;
+	end
 
-	DelayedCalls:Add("DelayedUpdateFontSize", 0.5, function()
-		self._health_numbers:set_font_size(size/3);
-		self._armor_numbers:set_font_size(size/3);
+	self._radial_health_panel:child("radial_health"):hide()
+	self._radial_health_panel:child("radial_shield"):hide()
+
+	DelayedCalls:Add("DelayedUpdateFontSize", 0.1, function()
+		self._health_numbers:set_font_size((size/3) + 12);
+		self._armor_numbers:set_font_size(self._health_numbers:font_size());
 	end)
 
 	if not self._health_numbers then
@@ -68,9 +73,8 @@ local function MUIResized(self,size)
 		font_size = 18,
 		color = Color.white,
 		align = "center",
-		vertical = "center",
+		vertical = "top",
 		layer = 3,
-		y = 3,
 		visible = true
 		});
 		self._health_numbers = health_numbers
@@ -84,9 +88,8 @@ local function MUIResized(self,size)
 		font_size = 18,
 		color = Color.white,
 		align = "center",
-		vertical = "top",
+		vertical = "bottom",
 		layer = 3,
-		y = 17,
 		visible = true
 		});
 		self._armor_numbers = armor_numbers
