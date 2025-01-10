@@ -122,6 +122,22 @@ function MUIStats:init()
 		font = muiFont,
 		text = "0/0"
 	});
+	local cv_icon, cv_rect = tweak_data.hud_icons:get_icon_data("minions_converted");
+	local converts_panel = supplements:panel({
+		layer = 1,
+		name = "converts_panel"
+	});
+	self._converts_panel = converts_panel;
+	converts_panel:bitmap({
+		name = "icon",
+		texture = cv_icon,
+		texture_rect = cv_rect
+	});
+	converts_panel:text({
+		name = "amount",
+		font = muiFont,
+		text = "0"
+	});
 	local wave_panel = supplements:panel({
 		layer = 1,
 		name = "wave_panel",
@@ -147,7 +163,7 @@ function MUIStats:init()
 		name = "title",
 		font = muiFont,
 		color = Color.white,
-		text = managers.localization:to_upper_text("dialog_wait"),
+		text = "",
 	});
 	objectives_panel:text({
 		name = "amount",
@@ -224,10 +240,11 @@ function MUIStats:load_state()
 	if active_objective then
 		self:set_objective(active_objective);
 	end
+	
 	local groupai_state = tunnel(managers, "groupai", "state");
 	if groupai_state then
 		self:on_whisper_mode_changed(groupai_state:whisper_mode());
-		self:on_pager_bluff()
+		self:on_pager_bluff();
 		self:set_wave(0);
 		groupai_state:add_listener("MUIStats_whisper_mode",
 			{"whisper_mode"},
@@ -292,6 +309,7 @@ function MUIStats:resize()
 				local hostages = self._hostages_panel;
 				local bodybags = self._bodybags_panel;
 				local pagers = self._pagers_panel;
+				local converts = self._converts_panel;
 				local wave = self._wave_panel;
 		local obj = self._objectives_panel;
 		local loot = self._loot_panel;
@@ -303,7 +321,7 @@ function MUIStats:resize()
 	Figure(top):shape(width, s33);
 	Figure(time):rect(s33);
 	Figure(assault):progeny(line, s33):adapt():align(2, 1);
-	Figure({hostages,bodybags,pagers,wave}):progeny(line, s33):adapt();
+	Figure({hostages,bodybags,pagers,converts,wave}):progeny(line, s33):adapt();
 	Figure(supplements):shape(width, s33):align(3, 1); -- TODO: elude(assault)
 	supplements:set_margin(size/7)
 	supplements:reposition();
@@ -427,9 +445,19 @@ function MUIStats:_animate(data)
 	end
 end
 
+function MUIStats:on_convert()
+	local is_whisper_mode = managers.groupai and managers.groupai:state():whisper_mode();
+	if not is_whisper_mode and managers.player:has_category_upgrade("player", "convert_enemies") then
+		local text = self._converts_panel:child("amount");
+		text:set_text(tostring(managers.player:num_local_minions()));
+	else
+		self._converts_panel:set_visible(false);
+	end
+end
 
 function MUIStats:show(instant)
 	self._panel:stop();
+	self:on_convert(); -- Very dumb way of handling this but oh well..
 	self._panel:animate(callback(self, self, "_animate", {true, instant}));
 end
 function MUIStats:hide(instant)
@@ -529,6 +557,8 @@ function MUIStats:loot_value_updated()
 	local acquired = bag:child("amount");
 	local cash = loot:child("text");
 	local gage = loot:child("gage_amount");
+	local gage_icon = loot:child("gage_icon");
+	local gage_text = loot:child("gage_text");
 
 	local job = managers.job;
 	local global = managers.loot._global;
@@ -561,14 +591,28 @@ function MUIStats:loot_value_updated()
 	end
 	total_value = math.floor(total_value * 0.001);
 	
-	local text = tostring(bonus);
-	if mandatory >= 1 then
-		text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
+	-- local text = tostring(bonus);
+	-- if mandatory >= 1 then
+		-- text = format("%d/%d %s", required, mandatory, bonus > 0 and "+" .. bonus or "");
+	-- end
+
+	local loot_amount = "";
+	local loot_count = managers.interaction:get_current_total_loot_count();
+
+	if EIVHUD and EIVHUD.Options:GetValue("HUD/Tab") and loot_count > 0 then
+		local border_crossing_fix = Global.game_settings.level_id == "mex" and loot_count > 41 and "/4";
+		loot_amount = border_crossing_fix or "/" .. loot_count;
 	end
 
-	acquired:set_text(text);
+	acquired:set_text(tostring(required + bonus) .. loot_amount);
+	
 	cash:set_text(managers.experience:cash_string(total_value).."K");
 	gage:set_text(format("%d/%d", packages - remaining, packages));
+
+	gage:set_visible(remaining < packages);
+	gage_icon:set_visible(remaining < packages);
+	gage_text:set_visible(remaining < packages);
+
 	self:resize_loot();
 end
 

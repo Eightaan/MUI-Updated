@@ -4,6 +4,7 @@
 -- License GPLv3 <https://www.gnu.org/licenses/>
 --
 -- Inquiries should be submitted by email to <mui@amaranth.red>.
+--Down counter? not self ai?
 --------
 _G.MUITeammate = _G.MUITeammate or class(HUDTeammate);
 ArmStatic.void(MUITeammate, {
@@ -12,6 +13,7 @@ ArmStatic.void(MUITeammate, {
 	"_set_weapon_selected", "layout_special_equipments", "set_stored_health_max",
 	"_animate_update_absorb", "animate_update_absorb_active", "_animate_timer", "_animate_timer_flash"
 });
+
 
 --- /// Bunch of helper functions to alter MUI health display - Freyah /// 
 
@@ -785,22 +787,22 @@ function MUITeammate:resize()
 	MUIResized(self, size);
 
 	local panel = self._panel;
-		local name = self._name;
-		local condition = self._condition_icon;
-		local timer = self._condition_timer;
-		local info = self._info_list;
-			local stamina = self._stamina_icon;
-		local special = self._special_list;
+	local name = self._name;
+	local condition = self._condition_icon;
+	local timer = self._condition_timer;
+	local info = self._info_list;
+	local stamina = self._stamina_icon;
+	local special = self._special_list;
 
 	local player = self._player_panel;
-		local health = self._radial_health_panel;
-			local ability = self._ability_icon;
-		local weapons = self._weapons_panel;
-			local primary = self._primary_weapon_panel;
-			local secondary = self._secondary_weapon_panel;
-		local equipment = self._equipment_list;
-		local carry = self._carry_panel;
-		local interact = self._interact_panel;
+	local health = self._radial_health_panel;
+	local ability = self._ability_icon;
+	local weapons = self._weapons_panel;
+	local primary = self._primary_weapon_panel;
+	local secondary = self._secondary_weapon_panel;
+	local equipment = self._equipment_list;
+	local carry = self._carry_panel;
+	local interact = self._interact_panel;
 
 	shape_main = main;
 	Figure(carry):shape(s33):spank();
@@ -815,7 +817,7 @@ function MUITeammate:resize()
 
 	Figure(player):adapt():move(dock == 4 and total or 0, dock == 1 and total or 0);
 	Figure(special):shape(vert and total or player:w(), vert and player:h() or total):
-		attach(player, dock):recur():spank(s33, s33, s33/2);
+	attach(player, dock):recur():spank(s33, s33, s33/2);
 	special:set_direction(vert and 2 or 1);
 	special:set_align(jtfy);
 	special:set_flip(flip);
