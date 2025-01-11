@@ -267,7 +267,7 @@ function MUITeammate:create_info_list(parent)
 	self._stamina_icon = panel:bitmap({
 		name = "stamina_icon",
 		visible = false,
-		texture = "guis/textures/pd2/skilltree/drillgui_icon_restarter",
+		texture = "guis/textures/pd2/hud_radial_rim",
 		render_template = "VertexColorTexturedRadial",
 		layer = 2,
 		color = Color.white
