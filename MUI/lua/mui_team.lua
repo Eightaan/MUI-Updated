@@ -955,11 +955,11 @@ function MUITeammate:redisplay_ammo(index)
 		wac, wat = self._primary_ammo_clip, self._primary_ammo_total;
 	end
 
-	if self._muiAmmo > 1 and total >= clip then
+	if  self._main_player and self._muiAmmo > 1 and total >= clip then
 			total = total - clip;
 			total_m = total_m - clip_m;
 
-		if self._muiAmmo == 3 and clip_m > 0 then
+		if self._main_player and self._muiAmmo == 3 and clip_m > 0 then
 			total = ceil(total / clip_m);
 			total_m = ceil(total_m / clip_m);
 		end
@@ -1183,7 +1183,7 @@ function MUITeammate:redisplay_name(force)
 		name = managers.localization:text("menu_" .. self:criminal().name);
 	elseif (clean == 3) or (clean == 2 and name:len() > 20) then
 		name = ArmStatic.clean_name(name);
-		name = name:len() > 0 and name or "The Unparseable";
+		name = name:len() > 0 and name or managers.localization:text("menu_" .. self:criminal().name);
 	end
 
 	if upper then name = utf8.to_upper(name); end
