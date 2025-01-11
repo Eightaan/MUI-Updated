@@ -171,13 +171,6 @@ function ArmStatic.set_padded_amount(text, amount, alt)
 	elseif amount <= 9 then text:set_range_color(0, 1, text:color():with_alpha(0.5)) end
 end
 
--- function ArmStatic.set_padded_amount(text, amount, alt)
-	-- alt = alt or 0;
-	-- text:set_text(alt > 0 and format("%d|%d", min(amount, 14), min(alt, 9)) or format("%02d", amount));
-	-- if alt > 0 then text:set_range_color(0,2, text:color():with_alpha(0.5))
-	-- elseif amount <= 9 then text:set_range_color(0, 3, text:color():with_alpha(0.5)) end
--- end
-
 function ArmStatic.set_shape_children(object, x, y, w, h, f, c)
 	local children = object:children();
 	for i=1, #children do
