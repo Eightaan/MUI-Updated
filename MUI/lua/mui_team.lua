@@ -1232,9 +1232,12 @@ function MUITeammate:redisplay_name(force)
 		name = "";
 	elseif not waiting and clean == 4 and self:criminal() then
 		name = managers.localization:text("menu_" .. self:criminal().name);
-	elseif (clean == 3) or (clean == 2 and name:len() > 20) then
+	elseif (clean == 3) or (clean == 2 and name:len() > 18) then
 		name = ArmStatic.clean_name(name);
 		name = name:len() > 0 and name or managers.localization:text("menu_" .. self:criminal().name);
+		if not self._main_player and name:len() > 18 then
+			name = managers.localization:text("menu_" .. self:criminal().name);
+		end
 	end
 
 	if upper then name = utf8.to_upper(name); end
