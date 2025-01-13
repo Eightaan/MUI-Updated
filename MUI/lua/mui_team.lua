@@ -1365,8 +1365,7 @@ end
 -- Set local revives variable and display warning if last life.
 function MUITeammate:set_revives(revives)
 --	revives = revives or self._revives-1;
-	--self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and not self._ai and self._revives_icon, revives == 1);
-	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and self._revives_icon, revives < 6);
+	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and not self._ai and self._revives_icon, revives == 1);
 	if self._cooldown_timer then
 		self._cooldown_timer:set_alpha(revives == 0 and 0 or 1);
 	end
@@ -1437,7 +1436,7 @@ function MUITeammate:set_health(data)
 	self._health_data = data;
 	MUISetNewHealthValue(self);
 	--local dt, dc, dr = data.total, data.current, data.revives;
-	local dt, dc, dr = data.total, data.current;
+	local dt, dc = data.total, data.current;
 	local hp, rip = self._radial_health, self._radial_rip;
 	local radial_rip_bg = self.radial_rip_bg;
 	local red = data.current / data.total;
