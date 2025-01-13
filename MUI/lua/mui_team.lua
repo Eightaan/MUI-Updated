@@ -4,7 +4,6 @@
 -- License GPLv3 <https://www.gnu.org/licenses/>
 --
 -- Inquiries should be submitted by email to <mui@amaranth.red>.
---Down counter? not self ai?
 --------
 _G.MUITeammate = _G.MUITeammate or class(HUDTeammate);
 ArmStatic.void(MUITeammate, {
@@ -67,30 +66,30 @@ local function MUIResized(self,size)
 
 	if not self._health_numbers then
 		local health_numbers = self._radial_health_panel:text({
-		name = "health_numbers",
-		text = "nil",
-		font = self._font,
-		font_size = 18,
-		color = Color.white,
-		align = "center",
-		vertical = "top",
-		layer = 3,
-		visible = true
+			name = "health_numbers",
+			text = "nil",
+			font = self._font,
+			font_size = 18,
+			color = Color.white,
+			align = "center",
+			vertical = "top",
+			layer = 3,
+			visible = true
 		});
 		self._health_numbers = health_numbers
 	end
 
 	if not self._armor_numbers then
 		local armor_numbers = self._radial_health_panel:text({
-		name = "armor_numbers",
-		text = "nil",
-		font = self._font,
-		font_size = 18,
-		color = Color.white,
-		align = "center",
-		vertical = "bottom",
-		layer = 3,
-		visible = true
+			name = "armor_numbers",
+			text = "nil",
+			font = self._font,
+			font_size = 18,
+			color = Color.white,
+			align = "center",
+			vertical = "bottom",
+			layer = 3,
+			visible = true
 		});
 		self._armor_numbers = armor_numbers
 	end
@@ -118,6 +117,18 @@ function MUITeammate:init(i, team)
 	self:defaults();
 	self:create_panel(team);
 	self:resize();
+end
+
+function MUITeammate:_set_infinite_ammo(state)
+	self._infinite_ammo = state;
+	if self._infinite_ammo then
+		self._primary_ammo_clip:set_color(Color.white);
+		self._primary_ammo_clip:set_text("8");
+		self._primary_ammo_clip:set_rotation(90);
+		self._secondary_ammo_clip:set_color(Color.white);
+		self._secondary_ammo_clip:set_text("8");
+		self._secondary_ammo_clip:set_rotation(90);
+	end
 end
 
 function MUITeammate:defaults()
@@ -173,7 +184,7 @@ end
 
 function MUITeammate:create_player_panel(parent)
 	local panel = parent:panel({name = "player"});
-	self._player_panel = panel
+	self._player_panel = panel;
 
 	self:create_radial_panel(panel);
 	self:create_interact_panel(panel);
@@ -190,6 +201,16 @@ function MUITeammate:create_condition_panel(parent)
 		color = Color.white
 	});
 	self._condition_timer = parent:text({
+		name = "condition_timer",
+		visible = false,
+		text = "00",
+		layer = 5,
+		color = Color.black,
+		align = "center",
+		vertical = "center",
+		font = self._font
+	});
+	self._cooldown_timer = parent:text({
 		name = "condition_timer",
 		visible = false,
 		text = "00",
@@ -379,7 +400,6 @@ function MUITeammate:create_radial_panel(parent)
 		render_template = "VertexColorTexturedRadialFlex",
 		layer = 5
 	});
-
 	self._absorb_health = panel:bitmap({
 		name = "radial_absorb_health_active",
 		color = Color.black,
@@ -453,7 +473,21 @@ function MUITeammate:create_radial_panel(parent)
 			color = Color(1, 0, 0, 0),
 			w = panel:w(),
 			h = panel:h()
-		})
+		});
+	end
+
+	if self._main_player then
+		self._radial_armor = panel:bitmap({
+			texture = "guis/textures/pd2/hud_swansong",
+			name = "radial_armor",
+			blend_mode = "add",
+			visible = false,
+			render_template = "VertexColorTexturedRadial",
+			layer = 5,
+			color = Color(1, 0, 0, 0),
+			w = panel:w(),
+			h = panel:h()
+		});
 	end
 end
 
@@ -717,8 +751,8 @@ function MUITeammate:set_waiting(waiting, peer)
 		local wpet = wp:child("throw");
 		local wpep = wp:child("perk");
 		local wpd = wp:child("detection");
-			local wpdl = wpd:child("detection_left");
-			local wpdr = wpd:child("detection_right");
+		local wpdl = wpd:child("detection_left");
+		local wpdr = wpd:child("detection_right");
 		local wpdv = wp:child("detection_value");
 
 		local name = peer:name();
@@ -792,6 +826,7 @@ function MUITeammate:resize()
 	local name = self._name;
 	local condition = self._condition_icon;
 	local timer = self._condition_timer;
+	local cooldown = self._cooldown_timer;
 	local info = self._info_list;
 	local stamina = self._stamina_icon;
 	local special = self._special_list;
@@ -829,8 +864,10 @@ function MUITeammate:resize()
 	Figure(name):shape(player:w() - s33, s33):leech(player):attach(carry:visible() and carry, 2);
 	Figure(condition):shape(size):leech(player):attach(carry, 3);
 	Figure(timer):shape(s66):leech(condition):align(2);
+	Figure(cooldown):shape(size/3):leech(condition):align(2);
 
-	Figure(info):shape(s66, s33):leech(player):align(3, 1):spank(s33);
+	--Figure(info):shape(s66, s33):leech(player):align(3, 1):spank(s33);
+	Figure(info):shape(size/3):leech(condition):align(2):spank(s33);
 
 	if not self._muiStam and stamina:visible() then info:set_visible_panel(stamina, false); end
 	info:reposition();
@@ -852,13 +889,13 @@ function MUITeammate:resize_wait()
 	local s33, s66 = size/3, size/1.5;
 
 	local player = self._player_panel;
-		local carry = self._carry_panel;
+	local carry = self._carry_panel;
 	local wait = self._wait_panel;
-		local detect = wait:child("detection");
-		local value = wait:child("detection_value");
-		local deploy = wait:child("deploy");
-		local throw = wait:child("throw");
-		local perk = wait:child("perk");
+	local detect = wait:child("detection");
+	local value = wait:child("detection_value");
+	local deploy = wait:child("deploy");
+	local throw = wait:child("throw");
+	local perk = wait:child("perk");
 
 	Figure(detect):shape(size):spank();
 	Figure(value):rect(s33):leech(detect):align(2);
@@ -889,7 +926,7 @@ function MUITeammate:add_special_equipment(data)
 			text = tostring(data.amount),
 			font = "fonts/font_medium_noshadow_mf",
 			font_size = spcSize/2,
-			color = (self._prime_color * 0.5):with_alpha(1),
+			color = (Color.black):with_alpha(1),
 			h = spcSize,
 			w = spcSize,
 			align = "center",
@@ -941,6 +978,20 @@ function MUITeammate:set_ammo_amount_by_type(index, max_clip, current_clip, curr
 	data.total = current_left;
 	data.total_m = max_left or max(data.total_m, current_left);
 	self:redisplay_ammo(index);
+
+	if self._main_player and self._infinite_ammo then
+		self._primary_ammo_clip:set_text("8");
+		self._secondary_ammo_clip:set_text("8");
+
+		self._primary_ammo_clip:set_color(Color.white);
+		self._secondary_ammo_clip:set_color(Color.white);
+
+		self._primary_ammo_clip:set_rotation(90);
+		self._secondary_ammo_clip:set_rotation(90);
+	else
+		self._primary_ammo_clip:set_rotation(0);
+		self._secondary_ammo_clip:set_rotation(0);
+	end
 end
 
 local ooa, loa = Color(1, 0.9, 0.3, 0.3), Color(1, 0.9, 0.9, 0.3);
@@ -989,9 +1040,9 @@ function MUITeammate:set_callsign(id)
 	self._carry_icon:set_color(color);
 	self._interact_success:set_color(color);
 
-	local comp_color = self._muiColor and ArmStatic.complement(color):with_alpha(1) or Color.black;
-	self._comp_color = comp_color;
-	self._condition_timer:set_color(comp_color);
+	--local comp_color = self._muiColor and ArmStatic.complement(color):with_alpha(1) or Color.black;
+	self._comp_color = self._prime_color;
+	self._condition_timer:set_color(self._prime_color);
 
 	if self._muiColor then
 		local rhf = tunnel_c(self._player_panel, "radial_health_panel", "radial_health_fill");
@@ -1019,8 +1070,8 @@ end
 function MUITeammate:set_deployable_equipment(data)
 	local icon, texture_rect = tweak_data.hud_icons:get_icon_data(data.icon);
 	self._deployable_equipment_icon:set_image(icon, unpack(texture_rect));
-	self._deployable_equipment_icon:set_visible(true)
-	self._deployable_equipment_text:set_visible(true)
+	self._deployable_equipment_icon:set_visible(true);
+	self._deployable_equipment_text:set_visible(true);
 	self:set_deployable_equipment_amount(1, data);
 end
 function MUITeammate:set_deployable_equipment_from_string(data)
@@ -1104,7 +1155,7 @@ function MUITeammate.align_panels()
 
 	Figure(team):shape(vert and wMax or wSum, vert and hSum or hMax):align(hPos, vPos, hMarg, vMarg);
 	team:set_direction(dir);
-	team:set_order(order)
+	team:set_order(order);
 	team:set_align(vert and vPos or hPos);
 	team:set_justify(jtfy > 0 and jtfy or (vert and hPos or vPos));
 	team:set_margin(gap);
@@ -1303,7 +1354,6 @@ function MUITeammate:set_stamina(val)
 		self._stamina = val;
 
 		si:set_color(Color(new_r, 1, 1));
-
 		if not si:visible() and new_r < 0.5 then
 			self._info_list:set_visible_panel(si, true);
 		elseif si:visible() and new_r > 0.9 then
@@ -1314,10 +1364,14 @@ end
 
 -- Set local revives variable and display warning if last life.
 function MUITeammate:set_revives(revives)
-	revives = revives or self._revives-1;
-	self._info_list:set_visible_panel(self._revives_icon, revives < 2);
-	self._down = false;
-	self._revives = revives;
+--	revives = revives or self._revives-1;
+	--self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and not self._ai and self._revives_icon, revives == 1);
+	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and self._revives_icon, revives < 6);
+	if self._cooldown_timer then
+		self._cooldown_timer:set_alpha(revives == 0 and 0 or 1);
+	end
+--	self._down = false;
+--	self._revives = revives;
 end
 
 -- Find and/or return criminal for panel
@@ -1344,6 +1398,7 @@ function MUITeammate:remove_panel()
 	self._absorb_shield:set_color(Color.black);
 	self._delayed_health:set_color(Color.black);
 	self._delayed_shield:set_color(Color.black);
+	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and self._revives_icon, false);
 	if self._radial_rip then self._radial_rip:hide(); end
 	self:set_cheater(false);
 	self:set_info_meter({
@@ -1381,64 +1436,65 @@ end
 function MUITeammate:set_health(data)
 	self._health_data = data;
 	MUISetNewHealthValue(self);
-	local dt, dc, dr = data.total, data.current, data.revives;
+	--local dt, dc, dr = data.total, data.current, data.revives;
+	local dt, dc, dr = data.total, data.current;
 	local hp, rip = self._radial_health, self._radial_rip;
-	local radial_rip_bg = self.radial_rip_bg
-	local red = data.current / data.total
+	local radial_rip_bg = self.radial_rip_bg;
+	local red = data.current / data.total;
 	--This will attempt to wean out whether a team member was downed.
 	--It does not account for joining mid-game as I'm trying to keep it simple, and babysitting other players is not really your job anyway.
-	if MUITeammate._muiRevL and dr and dr ~= self._revives then
-		self:set_revives(dr);
-	elseif MUITeammate._muiRevS and not self._main_player then
-		if not self._custardy and dc <= 0 then
-			if data.no_hint then
-				self._custardy = true;
-				self:set_revives(4);
-			else
-				self._crimedad = true;
-			end
-		end
-		if dc > 0 then
-			self._custardy, self._crimedad = false, false;
-			if self._down then
-				self:set_revives();
-			end
-		end
-	end
+	-- if MUITeammate._muiRevL and dr and dr ~= self._revives then
+		-- self:set_revives(dr);
+	-- elseif MUITeammate._muiRevS and not self._main_player then
+		-- if not self._custardy and dc <= 0 then
+			-- if data.no_hint then
+				-- self._custardy = true;
+				-- self:set_revives(4);
+			-- else
+				-- self._crimedad = true;
+			-- end
+		-- end
+		-- if dc > 0 then
+			-- self._custardy, self._crimedad = false, false;
+			-- if self._down then
+				-- self:set_revives();
+			-- end
+		-- end
+	-- end
 
 	if managers.player:has_activate_temporary_upgrade("temporary", "copr_ability") and self._id == HUDManager.PLAYER_PANEL and not MUIMenu._data.mui_disable_leech_support then
-		local static_damage_ratio = managers.player:upgrade_value_nil("player", "copr_static_damage_ratio")
-		hp:stop()
+		local static_damage_ratio = managers.player:upgrade_value_nil("player", "copr_static_damage_ratio");
+		hp:stop();
 
 		if static_damage_ratio then
-			red = math.floor((red + 0.01) / static_damage_ratio) * static_damage_ratio
+			red = math.floor((red + 0.01) / static_damage_ratio) * static_damage_ratio;
 		end
 
-		local copr_overlay_panel = self.copr_overlay_panel
+		local copr_overlay_panel = self.copr_overlay_panel;
 
 		if alive(copr_overlay_panel) then
 			for _, notch in ipairs(copr_overlay_panel:children()) do
-				notch:set_visible(notch:script().red <= red + 0.01)
+				notch:set_visible(notch:script().red <= red + 0.01);
 			end
 		end
 
 		if red < hp:color().red then
-			self:_damage_taken()
-			hp:set_color(Color(1, red, 1, 1))
+			self:_damage_taken();
+			hp:set_color(Color(1, red, 1, 1));
 		else
 			hp:animate(function (o)
-				local s = hp:color().r
-				local e = red
-				local health_ratio = nil
+				local s = hp:color().r;
+				local e = red;
+				local health_ratio = nil;
 
 				over(0.2, function (p)
-					health_ratio = math.lerp(s, e, p)
+					health_ratio = math.lerp(s, e, p);
 
-					hp:set_color(Color(1, health_ratio, 1, 1))
+					hp:set_color(Color(1, health_ratio, 1, 1));
 
 					if alive(copr_overlay_panel) then
 						for _, notch in ipairs(copr_overlay_panel:children()) do
-							notch:set_visible(notch:script().red <= health_ratio + 0.01)
+							notch:set_visible(notch:script().red <= health_ratio + 0.01);
 						end
 					end
 				end)
@@ -1474,8 +1530,8 @@ end
 function MUITeammate:_damage_taken()
 	if not self._muiDmg then return; end
 	local damage = self._damage_indicator;
-	damage:stop()
-	damage:animate(callback(self, self, "_animate_damage_taken"))
+	damage:stop();
+	damage:animate(callback(self, self, "_animate_damage_taken"));
 end
 
 function MUITeammate:set_radial(radial, cur, tot, aspd, flx)
@@ -1513,9 +1569,9 @@ function MUITeammate:teammate_progress(enabled, tweak_data_id, timer, complete)
 		if enabled then progress:animate(callback(progress, ArmStatic, "animate_progress", timer)); end
 		fade(progress, enabled and 1 or 0);
 	else
-		if self._revives < 4 and (tweak_data_id == "doctor_bag" or tweak_data_id == "firstaid_box") then
-			self:set_revives(4);
-		end
+		-- if self._revives < 4 and (tweak_data_id == "doctor_bag" or tweak_data_id == "firstaid_box") then
+			-- self:set_revives(4);
+		-- end
 		success:stop();
 		fade(success, 0);
 	end
@@ -1606,45 +1662,45 @@ end
 
 function MUITeammate:set_copr_indicator(enabled, static_damage_ratio)
 	if MUIMenu._data.mui_disable_leech_support then
-		return
+		return;
 	end
 
-	local teammate_panel = self._panel:child("player")
-	local radial_health_panel = self._radial_health_panel
-	local copr_overlay_panel = radial_health_panel:child("copr_overlay_panel")
-	local radial_health = radial_health_panel:child("radial_health")
-	local red = radial_health:color().r
+	local teammate_panel = self._panel:child("player");
+	local radial_health_panel = self._radial_health_panel;
+	local copr_overlay_panel = radial_health_panel:child("copr_overlay_panel");
+	local radial_health = radial_health_panel:child("radial_health");
+	local red = radial_health:color().r;
 	local main = self._main_player;
-	local size = main and self._muiSizeL or self._muiSizeS
-	local notch_size = 7
+	local size = main and self._muiSizeL or self._muiSizeS;
+	local notch_size = 7;
 	if size > 20 then
-		notch_size = ((size/1.5) * 1)/2
+		notch_size = ((size/1.5) * 1)/2;
 	end
 
 	if alive(copr_overlay_panel) then
-		copr_overlay_panel:clear()
-		copr_overlay_panel:set_visible(enabled)
+		copr_overlay_panel:clear();
+		copr_overlay_panel:set_visible(enabled);
 
 		if enabled then
-			local num_notches = math.ceil(1 / static_damage_ratio)
-			local rotation = nil
-			local cx, cy = copr_overlay_panel:center()
-			local v1 = Vector3()
-			local v2 = Vector3()
-			local v3 = Vector3()
-			local mset = mvector3.set_static
-			local x, y = nil
-			local w = 5
-			local h = math.min(copr_overlay_panel:w(), copr_overlay_panel:h()) / 6
+			local num_notches = math.ceil(1 / static_damage_ratio);
+			local rotation = nil;
+			local cx, cy = copr_overlay_panel:center();
+			local v1 = Vector3();
+			local v2 = Vector3();
+			local v3 = Vector3();
+			local mset = mvector3.set_static;
+			local x, y = nil;
+			local w = 5;
+			local h = math.min(copr_overlay_panel:w(), copr_overlay_panel:h()) / 6;
 
 			for i = 0, num_notches - 1 do
-				rotation = i / num_notches * 360
-				x = cx + math.sin(rotation) * notch_size
-				y = cy - math.cos(rotation) * notch_size
+				rotation = i / num_notches * 360;
+				x = cx + math.sin(rotation) * notch_size;
+				y = cy - math.cos(rotation) * notch_size;
 
-				mset(v1, 0, h, 0)
-				mset(v2, w, h, 0)
-				mset(v3, w / 2, 0, 0)
+				mset(v1, 0, h, 0);
+				mset(v2, w, h, 0);
+				mset(v3, w / 2, 0, 0);
 
 				local notch = copr_overlay_panel:polygon({
 					layer = 0,
@@ -1658,11 +1714,11 @@ function MUITeammate:set_copr_indicator(enabled, static_damage_ratio)
 					},
 					w = w,
 					h = h
-				})
-				notch:script().red = 1 - i / num_notches
+				});
+				notch:script().red = 1 - i / num_notches;
 
-				notch:set_visible(notch:script().red <= red + 0.01)
-				notch:set_center(x, y)
+				notch:set_visible(notch:script().red <= red + 0.01);
+				notch:set_center(x, y);
 			end
 		end
 	end
@@ -1690,4 +1746,69 @@ function MUITeammate:set_custom_radial(data)
 	local r = data.current / data.total;
 	radial_custom:set_color(Color(1, r, 1, 1));
 	radial_custom:set_visible(r > 0);
+
+	local aced = managers.player:upgrade_level("player", "berserker_no_ammo_cost", 0) == 1;
+	if self._main_player and EIVHUD and EIVHUD.Options:GetValue("HUD/PLAYER/Bulletstorm") and aced then
+		if r > 0 then
+			managers.hud:set_infinite_ammo(true);
+		else
+			managers.hud:set_infinite_ammo(false);
+		end
+	end
+	
+	if MUITeammate._muiRevS and not self._main_player and aced then
+		if r > 0 then
+			self._info_list:set_visible_panel(self._revives_icon, false);
+		end
+	end
+
+	if self._main_player and self._cooldown_timer then
+		if r > 0 then
+			self._cooldown_timer:set_visible(false);
+			if self._radial_armor then
+				self._radial_armor:set_alpha(0);
+			end
+		else
+			self._cooldown_timer:set_visible(self._armor_invulnerability_timer);
+
+			if self._radial_armor then
+				self._radial_armor:set_alpha(1);
+			end
+		end
+	end
+end
+
+function MUITeammate:_animate_invulnerability(duration)
+	self._radial_armor:animate(function(o)
+		o:set_color(Color(1, 1, 1, 1));
+		self._armor_invulnerability_timer = true;
+		o:set_visible(true);
+		over(duration, function(p)
+			o:set_color(Color(1, 1 - p, 1, 1));
+		end)
+		if not EIVHUD.Options:GetValue("HUD/PLAYER/ArmorerCooldownTimer") then
+			self._armor_invulnerability_timer = false;
+		end
+		o:set_visible(false);
+	end)
+end
+
+function MUITeammate:_update_cooldown_timer(t)
+	local timer = self._cooldown_timer;
+	if t and t > 1 and timer then
+		timer:stop();
+		timer:animate(function(o)
+			o:set_visible(true);
+			local t_left = t;
+			while t_left >= 0.1 do
+				self._armor_invulnerability_timer = true;
+				t_left = t_left - coroutine.yield();
+				t_format = t_left < 9.9 and "%.1f" or "%.f";
+				o:set_text(string.format(t_format, t_left));
+				o:set_color(EIVHUD.Options:GetValue("HUD/PLAYER/ArmorerCooldownTimerColor") or Color.blue);
+			end
+			self._armor_invulnerability_timer = false;
+			o:set_visible(false);
+		end)
+	end
 end
