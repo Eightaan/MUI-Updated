@@ -860,14 +860,16 @@ function MUITeammate:resize()
 	special:set_flip(flip);
 	special:reposition();
 
-
 	Figure(name):shape(player:w() - s33, s33):leech(player):attach(carry:visible() and carry, 2);
 	Figure(condition):shape(size):leech(player):attach(carry, 3);
 	Figure(timer):shape(s66):leech(condition):align(2);
 	Figure(cooldown):shape(size/3):leech(condition):align(2);
 
-	--Figure(info):shape(s66, s33):leech(player):align(3, 1):spank(s33);
-	Figure(info):shape(size/3):leech(condition):align(2):spank(s33);
+	if not MUIMenu._data.mui_enable_health_numbers then
+		Figure(info):shape(size/3):leech(condition):align(2):spank(s33);
+	else
+		Figure(info):shape(s66, s33):leech(player):align(3, 1):spank(s33);
+	end
 
 	if not self._muiStam and stamina:visible() then info:set_visible_panel(stamina, false); end
 	info:reposition();
@@ -1221,6 +1223,7 @@ end
 function MUITeammate:redisplay_name(force)
 	local name = self._base_name;
 	local waiting = self._waiting;
+	local size = self._muiSizeS;
 	local upper = self._muiUpper;
 	local clean = (self._main_player and self._muiCleanL) or self._muiCleanS or 0;
 	local nameOpt = clean + (upper and 1 or 0);
@@ -1232,11 +1235,14 @@ function MUITeammate:redisplay_name(force)
 		name = "";
 	elseif not waiting and clean == 4 and self:criminal() then
 		name = managers.localization:text("menu_" .. self:criminal().name);
-	elseif (clean == 3) or (clean == 2 and name:len() > 18) then
+	elseif (clean == 3) or (clean == 2 and name:len() > 19) then
 		name = ArmStatic.clean_name(name);
 		name = name:len() > 0 and name or managers.localization:text("menu_" .. self:criminal().name);
-		if not self._main_player and name:len() > 18 then
-			name = managers.localization:text("menu_" .. self:criminal().name);
+		if not self._main_player then
+			local name_len = name:len()
+            local name_font = size / math.min(math.max(3, name_len / 6), 5) -- Dynamic scaling of font size
+
+            self._name:set_font_size(name_font)
 		end
 	end
 
@@ -1368,7 +1374,7 @@ end
 -- Set local revives variable and display warning if last life.
 function MUITeammate:set_revives(revives)
 --	revives = revives or self._revives-1;
-	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and not self._ai and self._revives_icon, revives == 1);
+	self._info_list:set_visible_panel(MUITeammate._muiRevS and not self._main_player and self._revives_icon, revives == 1);
 	if self._cooldown_timer then
 		self._cooldown_timer:set_alpha(revives == 0 and 0 or 1);
 	end
