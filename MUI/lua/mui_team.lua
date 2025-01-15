@@ -2,7 +2,6 @@
 -- MUI <https://paydaymods.com/mods/44/arm_mui>
 -- Copyright (C) 2015 Armithaig
 -- License GPLv3 <https://www.gnu.org/licenses/>
---
 -- Inquiries should be submitted by email to <mui@amaranth.red>.
 --------
 _G.MUITeammate = _G.MUITeammate or class(HUDTeammate);
@@ -899,7 +898,8 @@ function MUITeammate:resize_wait()
 	local throw = wait:child("throw");
 	local perk = wait:child("perk");
 
-	Figure(detect):shape(size):spank();
+	--Figure(detect):shape(size):spank();
+	Figure(detect):shape(size):leech(player):attach(carry, 3);
 	Figure(value):rect(s33):leech(detect):align(2);
 	Figure(deploy):shape(s66, s33):attach(detect, 2):progeny(shape_material);
 	Figure(throw):shape(s66, s33):attach(deploy, 3):progeny(shape_material);
@@ -1239,11 +1239,13 @@ function MUITeammate:redisplay_name(force)
 		name = ArmStatic.clean_name(name);
 		name = name:len() > 0 and name or managers.localization:text("menu_" .. self:criminal().name);
 		if not self._main_player then
-			local name_len = name:len()
-            local name_font = size / math.min(math.max(3, name_len / 6), 5) -- Dynamic scaling of font size
+			local name_len = name:len();
+			local name_font = size / math.min(math.max(3, name_len / 6), 5); -- Dynamic scaling of font size
 
-            self._name:set_font_size(name_font)
+			self._name:set_font_size(name_font);
 		end
+	else
+		self._name:set_font_size(size/3);
 	end
 
 	if upper then name = utf8.to_upper(name); end
