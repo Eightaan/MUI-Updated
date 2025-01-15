@@ -131,7 +131,7 @@ function MUITeammate:_set_infinite_ammo(state)
 end
 
 function MUITeammate:defaults()
-	self._revives = 4;
+	--self._revives = 4;
 	self._max_stamina = 1;
 	self._stamina = 0;
 	self._timer_paused = 0;
@@ -864,7 +864,7 @@ function MUITeammate:resize()
 	Figure(timer):shape(s66):leech(condition):align(2);
 	Figure(cooldown):shape(size/3):leech(condition):align(2);
 
-	if not MUIMenu._data.mui_enable_health_numbers then
+	if not MUIMenu._data.mui_enable_health_numbers and not self._main_player then
 		Figure(info):shape(size/3):leech(condition):align(2):spank(s33);
 	else
 		Figure(info):shape(s66, s33):leech(player):align(3, 1):spank(s33);
