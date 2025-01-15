@@ -1245,7 +1245,9 @@ function MUITeammate:redisplay_name(force)
 			self._name:set_font_size(name_font);
 		end
 	else
-		self._name:set_font_size(size/3);
+		if not self._main_player then
+			self._name:set_font_size(size/3);
+		end
 	end
 
 	if upper then name = utf8.to_upper(name); end
